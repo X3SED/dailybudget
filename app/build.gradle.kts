@@ -50,6 +50,13 @@ android {
     buildFeatures {
         compose = true
     }
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+            // Les captures d'écran (README) sont générées par ScreenshotTest via Robolectric.
+            all { it.systemProperty("roborazzi.test.record", "true") }
+        }
+    }
     androidResources {
         // Permet de choisir la langue de l'app dans les réglages Android (13+).
         generateLocaleConfig = true
@@ -68,4 +75,11 @@ dependencies {
     implementation("androidx.core:core-ktx:1.15.0")
 
     testImplementation("junit:junit:4.13.2")
+    testImplementation(composeBom)
+    testImplementation("androidx.compose.ui:ui-test-junit4")
+    testImplementation("androidx.test.ext:junit:1.2.1")
+    testImplementation("org.robolectric:robolectric:4.14.1")
+    testImplementation("io.github.takahirom.roborazzi:roborazzi:1.40.0")
+    testImplementation("io.github.takahirom.roborazzi:roborazzi-compose:1.40.0")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
 }

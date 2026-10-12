@@ -6,7 +6,7 @@ import com.dailybudget.app.R
 /** Catégories de dépenses fréquentes. [fixed] = cochée « hors budget du jour » par défaut. */
 enum class Category(val key: String, val emoji: String, @StringRes val label: Int, val fixed: Boolean = false) {
     GROCERIES("groceries", "🛒", R.string.cat_groceries),
-    CAR("car", "🚗", R.string.cat_car),
+    CAR("car", "🚗", R.string.cat_car, fixed = true),
     SHOPPING("shopping", "🛍️", R.string.cat_shopping),
     FOOD("food", "🍽️", R.string.cat_food),
     TRANSPORT("transport", "🚌", R.string.cat_transport),

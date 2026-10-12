@@ -47,3 +47,16 @@ jobs:
             Download the `.apk` below on your phone and open it to install.
             Télécharge le fichier `.apk` ci-dessous depuis ton téléphone et ouvre-le pour l'installer.
           files: SimpleDailyBudget-*.apk
+
+      - name: Update README screenshots
+        if: github.event_name == 'push'
+        run: |
+          mkdir -p docs/screenshots
+          cp app/build/screenshots/*.png docs/screenshots/
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/screenshots
+          if ! git diff --cached --quiet; then
+            git commit -m "Update screenshots [skip ci]"
+            git push origin HEAD:${{ github.ref_name }}
+          fi
