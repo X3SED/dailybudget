@@ -17,7 +17,9 @@ class Money(currencyCode: String, private val locale: Locale = Locale.getDefault
         maximumFractionDigits = digits
     }
 
-    fun format(cents: Long): String = format.format(cents / 100.0)
+    // En anglais, Java colle le code au montant (« MAD314.44 ») : on ajoute une espace insécable.
+    fun format(cents: Long): String =
+        format.format(cents / 100.0).replace(Regex("^(-?)([A-Z]{3})(?=[\\d-])"), "$1$2\u00A0")
 
     /** Valeur pré-remplie dans un champ de saisie, avec le séparateur décimal local. */
     fun editable(cents: Long): String {

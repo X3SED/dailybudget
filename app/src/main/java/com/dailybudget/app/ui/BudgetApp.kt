@@ -267,11 +267,12 @@ private fun Hero(s: Summary) {
                 drawStopIndicator = {},
             )
             Spacer(Modifier.height(10.dp))
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(
                     stringResource(R.string.spent_today, money(s.spentTodayCents.coerceAtLeast(0))),
                     color = Color.White.copy(alpha = 0.85f),
                     style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.weight(1f),
                 )
                 Text(
                     stringResource(R.string.budget_per_day, money(s.dailyCents)),
