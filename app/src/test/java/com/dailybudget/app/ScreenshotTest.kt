@@ -50,10 +50,15 @@ class ScreenshotTest {
         )
         compose.setContent { BudgetTheme { BudgetApp(store) } }
         compose.waitForIdle()
+        // Horloge manuelle : le curseur clignotant des champs ne laisse jamais l'UI « idle » sinon.
+        compose.mainClock.autoAdvance = false
+        settle()
     }
 
+    private fun settle() = compose.mainClock.advanceTimeBy(2_000)
+
     private fun capture(name: String) {
-        compose.waitForIdle()
+        settle()
         captureScreenRoboImage("build/screenshots/$name.png")
     }
 
@@ -69,6 +74,7 @@ class ScreenshotTest {
     fun expenseFr() {
         launch()
         compose.onNodeWithText("Dépense").performClick()
+        settle()
         compose.onNodeWithText("Voiture", substring = true).performClick()
         capture("2-expense-fr")
     }
