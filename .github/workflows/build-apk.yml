@@ -22,7 +22,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
 
       - name: Tests
-        run: ./gradlew --no-daemon testDebugUnitTest
+        run: ./gradlew --no-daemon testDebugUnitTest --tests com.dailybudget.app.BudgetTest
 
       - name: Build APK
         run: ./gradlew --no-daemon assembleRelease -PbuildNumber=${{ github.run_number }}
@@ -48,8 +48,15 @@ jobs:
             Télécharge le fichier `.apk` ci-dessous depuis ton téléphone et ouvre-le pour l'installer.
           files: SimpleDailyBudget-*.apk
 
-      - name: Update README screenshots
+      # Captures du README : non bloquant, une capture ratée ne doit pas empêcher la release.
+      - name: Render screenshots
+        id: screenshots
         if: github.event_name == 'push'
+        continue-on-error: true
+        run: ./gradlew --no-daemon testDebugUnitTest --tests com.dailybudget.app.ScreenshotTest
+
+      - name: Update README screenshots
+        if: github.event_name == 'push' && steps.screenshots.outcome == 'success'
         run: |
           mkdir -p docs/screenshots
           cp app/build/screenshots/*.png docs/screenshots/

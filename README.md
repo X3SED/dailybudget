@@ -7,9 +7,9 @@ Available in English and French (follows the phone language, or pick it per app 
 
 All versions: [Releases](https://github.com/X3SED/dailybudget/releases)
 
-| Home | Expense | Dark mode (EN) | Settings |
-|:---:|:---:|:---:|:---:|
-| <img src="docs/screenshots/1-home-fr.png" width="200"> | <img src="docs/screenshots/2-expense-fr.png" width="200"> | <img src="docs/screenshots/3-home-en-dark.png" width="200"> | <img src="docs/screenshots/4-settings-en.png" width="200"> |
+| Home (FR) | Dark mode (EN) | Settings |
+|:---:|:---:|:---:|
+| <img src="docs/screenshots/1-home-fr.png" width="240"> | <img src="docs/screenshots/2-home-en-dark.png" width="240"> | <img src="docs/screenshots/3-settings-en.png" width="240"> |
 
 ## How it works
 
