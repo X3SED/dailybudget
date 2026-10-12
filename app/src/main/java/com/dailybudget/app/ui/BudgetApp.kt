@@ -5,8 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -78,6 +76,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LifecycleResumeEffect
@@ -493,7 +492,6 @@ private fun EntryRow(entry: Entry, onDelete: () -> Unit) {
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun AmountDialog(
     type: EntryType,
@@ -551,16 +549,22 @@ private fun AmountDialog(
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Category.entries.forEach { c ->
-                            FilterChip(
-                                selected = category == c,
-                                onClick = {
-                                    category = if (category == c) null else c
-                                    excluded = category?.fixed ?: false
-                                },
-                                label = { Text("${c.emoji} ${stringResource(c.label)}") },
-                            )
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Category.entries.chunked(2).forEach { pair ->
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                pair.forEach { c ->
+                                    FilterChip(
+                                        selected = category == c,
+                                        onClick = {
+                                            category = if (category == c) null else c
+                                            excluded = category?.fixed ?: false
+                                        },
+                                        label = { Text("${c.emoji} ${stringResource(c.label)}", maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                                        modifier = Modifier.weight(1f),
+                                    )
+                                }
+                                if (pair.size == 1) Spacer(Modifier.weight(1f))
+                            }
                         }
                     }
                 }
