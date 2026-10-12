@@ -97,6 +97,9 @@ import java.util.Locale
 private val LocalMoney = staticCompositionLocalOf { Money("EUR") }
 private val LocalAppLocale = staticCompositionLocalOf { Locale.getDefault() }
 
+/** Ouvre le clavier sur le champ montant ; désactivé pour les captures d'écran (Robolectric). */
+val LocalAutoFocus = staticCompositionLocalOf { true }
+
 @Composable
 private fun money(cents: Long) = LocalMoney.current.format(cents)
 
@@ -505,7 +508,9 @@ private fun AmountDialog(
     var excluded by remember { mutableStateOf(false) }
     val cents = Budget.parseCents(text, allowNegative = type == EntryType.BALANCE)
     val focus = remember { FocusRequester() }
+    val autoFocus = LocalAutoFocus.current
     LaunchedEffect(Unit) {
+        if (!autoFocus) return@LaunchedEffect
         // Attendre une frame que le champ soit attaché, sinon requestFocus() lève une exception.
         withFrameNanos { }
         runCatching { focus.requestFocus() }

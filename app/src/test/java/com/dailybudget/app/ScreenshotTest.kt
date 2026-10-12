@@ -1,6 +1,7 @@
 package com.dailybudget.app
 
 import android.content.Context
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -9,6 +10,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.dailybudget.app.ui.BudgetApp
 import com.dailybudget.app.ui.BudgetTheme
+import com.dailybudget.app.ui.LocalAutoFocus
 import com.github.takahirom.roborazzi.ExperimentalRoborazziApi
 import com.github.takahirom.roborazzi.captureScreenRoboImage
 import org.junit.Rule
@@ -48,7 +50,9 @@ class ScreenshotTest {
                 Entry(5, EntryType.EXPENSE, 3500, at(today, 13, 40), category = "food"),
             )
         )
-        compose.setContent { BudgetTheme { BudgetApp(store) } }
+        compose.setContent {
+            CompositionLocalProvider(LocalAutoFocus provides false) { BudgetTheme { BudgetApp(store) } }
+        }
         compose.waitForIdle()
         // Horloge manuelle : le curseur clignotant des champs ne laisse jamais l'UI « idle » sinon.
         compose.mainClock.autoAdvance = false
