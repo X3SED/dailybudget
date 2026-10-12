@@ -1,0 +1,66 @@
+<resources>
+    <string name="settings">Réglages</string>
+    <string name="can_spend_today">Tu peux encore dépenser aujourd\'hui</string>
+    <string name="over_budget_today">Dépassement aujourd\'hui</string>
+    <string name="spent_today">Dépensé : %1$s</string>
+    <string name="budget_per_day">Budget : %1$s / jour</string>
+    <string name="excluded_today">+ %1$s de dépenses fixes, non comptées</string>
+    <string name="balance">Solde du compte</string>
+    <string name="until_payday">Avant le salaire</string>
+    <plurals name="days">
+        <item quantity="one">%d jour</item>
+        <item quantity="many">%d jours</item>
+        <item quantity="other">%d jours</item>
+    </plurals>
+    <string name="payday_on">le %1$s</string>
+    <string name="tomorrow_hint">Si tu ne dépenses plus rien aujourd\'hui, tu auras %1$s par jour à partir de demain.</string>
+    <string name="reserve_hint">%1$s mis de côté ne sont pas comptés.</string>
+
+    <string name="welcome_title">Bienvenue 👋</string>
+    <string name="welcome_text">Indique combien il te reste sur ton compte et l\'app calcule combien tu peux dépenser chaque jour jusqu\'à ta prochaine paie.</string>
+    <string name="welcome_hint">Commence par régler ton jour de paie et ta monnaie dans les réglages.</string>
+    <string name="welcome_button">Entrer mon solde</string>
+
+    <string name="update_balance">Mettre à jour mon solde</string>
+    <string name="expense">Dépense</string>
+    <string name="income">Revenu</string>
+    <string name="history">Historique</string>
+    <string name="balance_updated">Solde mis à jour</string>
+    <string name="not_in_daily_budget">Hors budget du jour</string>
+    <string name="delete">Supprimer</string>
+
+    <string name="balance_title">Mon solde actuel</string>
+    <string name="balance_hint">Combien reste-t-il sur ton compte ?</string>
+    <string name="expense_title">Nouvelle dépense</string>
+    <string name="expense_hint">Montant dépensé</string>
+    <string name="income_title">Nouveau revenu</string>
+    <string name="income_hint">Salaire, remboursement…</string>
+    <string name="category_optional">Catégorie (facultatif)</string>
+    <string name="note_optional">Note (facultatif)</string>
+    <string name="exclude_expense">Dépense fixe / exceptionnelle</string>
+    <string name="exclude_expense_help">Pas comptée dans le budget du jour (loyer, factures, virement famille…). Elle baisse quand même ton solde.</string>
+    <string name="exclude_balance">Cette baisse vient de dépenses fixes</string>
+    <string name="exclude_balance_help">Loyer, factures, virements… la baisse ne sera pas comptée dans le budget du jour.</string>
+    <string name="ok">Valider</string>
+    <string name="cancel">Annuler</string>
+    <string name="save">Enregistrer</string>
+
+    <string name="payday_label">Jour de paie (1 à 31)</string>
+    <string name="payday_help">Le budget est calculé jusqu\'à la veille de ce jour.</string>
+    <string name="reserve_label">Somme à garder de côté</string>
+    <string name="reserve_help">Facultatif : exclue du budget journalier.</string>
+    <string name="currency">Monnaie</string>
+    <string name="search">Rechercher</string>
+
+    <string name="cat_groceries">Courses</string>
+    <string name="cat_car">Voiture &amp; essence</string>
+    <string name="cat_shopping">Magasin</string>
+    <string name="cat_food">Restaurant &amp; café</string>
+    <string name="cat_transport">Transport</string>
+    <string name="cat_rent">Loyer</string>
+    <string name="cat_bills">Factures</string>
+    <string name="cat_family">Famille</string>
+    <string name="cat_health">Santé</string>
+    <string name="cat_leisure">Loisirs</string>
+    <string name="cat_other">Autre</string>
+</resources>

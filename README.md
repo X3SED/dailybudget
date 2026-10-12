@@ -1,37 +1,40 @@
-# Budget du jour
+# Simple Daily Budget
 
-Application Android simple pour savoir **combien tu peux dépenser par jour** jusqu'à ta prochaine paie.
+A simple Android app that tells you **how much you can spend per day** until your next payday.
+Available in English and French (follows the phone language, or pick it per app in Android 13+ settings).
 
-## Utilisation
+## How it works
 
-1. Dans ⚙️ **Réglages**, indique ton **jour de paie** (ex. 1 ou 28) et, si tu veux, une **somme à garder de côté**.
-2. Appuie sur **Mettre à jour mon solde** et entre ce qu'il reste sur ton compte. C'est tout !
-3. L'app affiche :
-   - ce que tu peux **encore dépenser aujourd'hui** ;
-   - ton **budget par jour** = (solde − réserve) ÷ jours restants avant la paie (aujourd'hui inclus) ;
-   - combien tu auras par jour **à partir de demain** si tu ne dépenses plus rien.
+1. In ⚙️ **Settings**, pick your **currency** (MAD, EUR, USD… any ISO currency), your **payday** (e.g. 1 or 28)
+   and optionally an **amount to set aside**.
+2. Tap **Update my balance** and type what's left in your account. That's it.
+3. The app shows:
+   - what you can **still spend today**;
+   - your **daily budget** = (balance − set-aside) ÷ days left until payday (today included);
+   - how much you'll have per day **from tomorrow** if you spend nothing else today.
 
-Tu peux aussi saisir une **dépense** (elle est retirée du solde) ou un **revenu** comme ton salaire (il est ajouté),
-mais mettre à jour le solde de temps en temps suffit : l'app déduit toute seule ce que tu as dépensé dans la journée.
-Le budget du jour est figé à partir du solde en début de journée, donc il ne baisse pas au fil de tes achats.
+The daily budget is fixed from the balance at the start of the day, so it doesn't drop as you spend:
+just updating the balance is enough, the app works out what you spent today.
 
-Toutes les données restent sur le téléphone.
+Optionally you can log an **expense** (with a category: groceries, car & fuel, shopping, rent…) or an **income** (salary…).
 
-## Télécharger l'APK
+### Fixed / exceptional expenses
 
-Chaque push déclenche le workflow GitHub Actions **Build APK**, qui publie l'APK dans l'onglet
-**Releases** du dépôt (et en artefact du workflow). Sur le téléphone, télécharge le `.apk`, ouvre-le et
-autorise l'installation depuis cette source si Android le demande.
+Rent, bills or a family transfer at the start of the month shouldn't show as "over budget today".
+Mark them as **fixed / exceptional** (on by default for rent, bills and family): they lower the balance — so the
+daily budget for the rest of the month — but don't count against today's spending. When you only update your balance,
+tick **"This drop comes from fixed expenses"** for the same effect.
 
-Les APK sont signés avec la clé `app/dailybudget.keystore` du dépôt, ce qui permet d'installer chaque nouvelle
-version par-dessus l'ancienne sans perdre les données.
+All data stays on the phone.
 
-## Compiler soi-même
+## Download the APK
 
-Avec le SDK Android installé (JDK 17+) :
+Every push runs the **Build APK** GitHub Actions workflow, which publishes the APK under **Releases**.
+Download the `.apk` on your phone, open it and allow installs from that source if Android asks.
 
-```
-./gradlew assembleRelease
-```
+APKs are signed with `app/dailybudget.keystore` from the repo so each version installs over the previous one
+without losing data.
 
-L'APK se trouve dans `app/build/outputs/apk/release/`.
+## Build it yourself
+
+With the Android SDK (JDK 17+): `./gradlew assembleRelease` → `app/build/outputs/apk/release/`.

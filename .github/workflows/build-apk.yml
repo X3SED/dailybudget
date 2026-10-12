@@ -28,21 +28,22 @@ jobs:
         run: ./gradlew --no-daemon assembleRelease -PbuildNumber=${{ github.run_number }}
 
       - name: Rename APK
-        run: cp app/build/outputs/apk/release/app-release.apk BudgetDuJour-1.0.${{ github.run_number }}.apk
+        run: cp app/build/outputs/apk/release/app-release.apk SimpleDailyBudget-1.0.${{ github.run_number }}.apk
 
       - uses: actions/upload-artifact@v4
         with:
-          name: BudgetDuJour-apk
-          path: BudgetDuJour-*.apk
+          name: SimpleDailyBudget-apk
+          path: SimpleDailyBudget-*.apk
 
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.0.${{ github.run_number }}
-          name: Budget du jour 1.0.${{ github.run_number }}
+          name: Simple Daily Budget 1.0.${{ github.run_number }}
           target_commitish: ${{ github.sha }}
           make_latest: true
           body: |
-            APK Android de « Budget du jour ».
+            Simple Daily Budget for Android (English / Français).
+            Download the `.apk` below on your phone and open it to install.
             Télécharge le fichier `.apk` ci-dessous depuis ton téléphone et ouvre-le pour l'installer.
-          files: BudgetDuJour-*.apk
+          files: SimpleDailyBudget-*.apk

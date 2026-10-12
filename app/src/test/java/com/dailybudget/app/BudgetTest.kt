@@ -76,6 +76,34 @@ class BudgetTest {
     }
 
     @Test
+    fun excludedExpensesDoNotCountAsSpentToday() {
+        val yesterday = today.minusDays(1)
+        val rent = Entry(nextId++, EntryType.EXPENSE, 400000, at(today, 9), category = "rent", excluded = true)
+        val entries = listOf(
+            entry(EntryType.BALANCE, 10000, yesterday),
+            rent,
+            entry(EntryType.EXPENSE, 50, today, 12),
+        )
+        val s = Budget.summarize(entries, Settings(payday = 1), today, zone)!!
+        assertEquals(595000L, s.balanceCents)
+        assertEquals(600000L / 20, s.dailyCents)
+        assertEquals(5000L, s.spentTodayCents)
+        assertEquals(400000L, s.excludedTodayCents)
+        assertEquals(30000L - 5000L, s.remainingTodayCents)
+    }
+
+    @Test
+    fun excludedBalanceDropIsNotCountedAsSpent() {
+        val yesterday = today.minusDays(1)
+        val drop = Entry(nextId++, EntryType.BALANCE, 600000, at(today, 9), excluded = true)
+        val entries = listOf(entry(EntryType.BALANCE, 10000, yesterday), drop, entry(EntryType.BALANCE, 5950, today, 18))
+        val s = Budget.summarize(entries, Settings(payday = 1), today, zone)!!
+        assertEquals(600000L / 20, s.dailyCents)
+        assertEquals(5000L, s.spentTodayCents)
+        assertEquals(400000L, s.excludedTodayCents)
+    }
+
+    @Test
     fun reserveIsExcluded() {
         val s = Budget.summarize(
             listOf(entry(EntryType.BALANCE, 1000)),
@@ -94,6 +122,10 @@ class BudgetTest {
         assertNull(Budget.parseCents("1,234"))
         assertNull(Budget.parseCents(""))
         assertNull(Budget.parseCents("-50"))
+        assertNull(Budget.parseCents("1x2"))
+        assertEquals(123450L, Budget.parseCents("1,234.50"))
+        assertEquals(123450L, Budget.parseCents("1.234,50 MAD"))
+        assertEquals(5000L, Budget.parseCents("MAD 50"))
         assertEquals(-5050L, Budget.parseCents("-50,5", allowNegative = true))
     }
 }

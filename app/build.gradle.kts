@@ -50,6 +50,10 @@ android {
     buildFeatures {
         compose = true
     }
+    androidResources {
+        // Permet de choisir la langue de l'app dans les réglages Android (13+).
+        generateLocaleConfig = true
+    }
 }
 
 dependencies {

@@ -1,3 +1,67 @@
 <resources>
-    <string name="app_name">Budget du jour</string>
+    <string name="app_name" translatable="false">Simple Daily Budget</string>
+
+    <string name="settings">Settings</string>
+    <string name="can_spend_today">You can still spend today</string>
+    <string name="over_budget_today">Over budget today</string>
+    <string name="spent_today">Spent: %1$s</string>
+    <string name="budget_per_day">Budget: %1$s / day</string>
+    <string name="excluded_today">+ %1$s of fixed expenses, not counted</string>
+    <string name="balance">Account balance</string>
+    <string name="until_payday">Until payday</string>
+    <plurals name="days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+    <string name="payday_on">on %1$s</string>
+    <string name="tomorrow_hint">If you spend nothing else today, you\'ll have %1$s per day from tomorrow.</string>
+    <string name="reserve_hint">%1$s set aside is not counted.</string>
+
+    <string name="welcome_title">Welcome 👋</string>
+    <string name="welcome_text">Enter how much is left in your account and the app tells you how much you can spend each day until your next payday.</string>
+    <string name="welcome_hint">Set your payday and currency in the settings first.</string>
+    <string name="welcome_button">Enter my balance</string>
+
+    <string name="update_balance">Update my balance</string>
+    <string name="expense">Expense</string>
+    <string name="income">Income</string>
+    <string name="history">History</string>
+    <string name="balance_updated">Balance updated</string>
+    <string name="not_in_daily_budget">Not in daily budget</string>
+    <string name="delete">Delete</string>
+
+    <string name="balance_title">My current balance</string>
+    <string name="balance_hint">How much is left in your account?</string>
+    <string name="expense_title">New expense</string>
+    <string name="expense_hint">Amount spent</string>
+    <string name="income_title">New income</string>
+    <string name="income_hint">Salary, refund…</string>
+    <string name="category_optional">Category (optional)</string>
+    <string name="note_optional">Note (optional)</string>
+    <string name="exclude_expense">Fixed / exceptional expense</string>
+    <string name="exclude_expense_help">Not counted in today\'s budget (rent, bills, family transfer…). It still lowers your balance.</string>
+    <string name="exclude_balance">This drop comes from fixed expenses</string>
+    <string name="exclude_balance_help">Rent, bills, transfers… the drop won\'t count against today\'s budget.</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+
+    <string name="payday_label">Payday (1 to 31)</string>
+    <string name="payday_help">The budget runs until the day before.</string>
+    <string name="reserve_label">Amount to set aside</string>
+    <string name="reserve_help">Optional: excluded from the daily budget.</string>
+    <string name="currency">Currency</string>
+    <string name="search">Search</string>
+
+    <string name="cat_groceries">Groceries</string>
+    <string name="cat_car">Car &amp; fuel</string>
+    <string name="cat_shopping">Shopping</string>
+    <string name="cat_food">Restaurant &amp; café</string>
+    <string name="cat_transport">Transport</string>
+    <string name="cat_rent">Rent</string>
+    <string name="cat_bills">Bills</string>
+    <string name="cat_family">Family</string>
+    <string name="cat_health">Health</string>
+    <string name="cat_leisure">Leisure</string>
+    <string name="cat_other">Other</string>
 </resources>
