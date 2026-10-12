@@ -62,6 +62,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -504,7 +505,11 @@ private fun AmountDialog(
     var excluded by remember { mutableStateOf(false) }
     val cents = Budget.parseCents(text, allowNegative = type == EntryType.BALANCE)
     val focus = remember { FocusRequester() }
-    LaunchedEffect(Unit) { focus.requestFocus() }
+    LaunchedEffect(Unit) {
+        // Attendre une frame que le champ soit attaché, sinon requestFocus() lève une exception.
+        withFrameNanos { }
+        runCatching { focus.requestFocus() }
+    }
 
     val (title, hint) = when (type) {
         EntryType.BALANCE -> R.string.balance_title to R.string.balance_hint

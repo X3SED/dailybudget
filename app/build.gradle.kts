@@ -54,7 +54,10 @@ android {
         unitTests {
             isIncludeAndroidResources = true
             // Les captures d'écran (README) sont générées par ScreenshotTest via Robolectric.
-            all { it.systemProperty("roborazzi.test.record", "true") }
+            all {
+                it.systemProperty("roborazzi.test.record", "true")
+                it.testLogging { exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL }
+            }
         }
     }
     androidResources {
