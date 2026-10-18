@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -73,10 +74,20 @@ class ScreenshotTest {
     }
 
     @Test
+    @Config(qualifiers = "fr-rFR-w400dp-h880dp-xxhdpi")
+    fun expenseFr() {
+        launch()
+        compose.onNodeWithText("Dépense").performClick()
+        settle()
+        compose.onNodeWithText("Voiture", substring = true).performClick()
+        capture("2-expense-fr")
+    }
+
+    @Test
     @Config(qualifiers = "en-rUS-w400dp-h880dp-night-xxhdpi")
     fun homeEnDark() {
         launch()
-        capture("2-home-en-dark")
+        capture("3-home-en-dark")
     }
 
     @Test
@@ -84,6 +95,6 @@ class ScreenshotTest {
     fun settingsEn() {
         launch()
         compose.onNodeWithContentDescription("Settings").performClick()
-        capture("3-settings-en")
+        capture("4-settings-en")
     }
 }

@@ -58,7 +58,7 @@ jobs:
       - name: Update README screenshots
         if: github.event_name == 'push' && steps.screenshots.outcome == 'success'
         run: |
-          mkdir -p docs/screenshots
+          rm -rf docs/screenshots && mkdir -p docs/screenshots
           cp app/build/screenshots/*.png docs/screenshots/
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

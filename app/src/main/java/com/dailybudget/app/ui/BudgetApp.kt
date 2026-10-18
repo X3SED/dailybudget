@@ -47,6 +47,12 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -93,8 +99,8 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-private val LocalMoney = staticCompositionLocalOf { Money("EUR") }
-private val LocalAppLocale = staticCompositionLocalOf { Locale.getDefault() }
+internal val LocalMoney = staticCompositionLocalOf { Money("EUR") }
+internal val LocalAppLocale = staticCompositionLocalOf { Locale.getDefault() }
 
 /** Ouvre le clavier sur le champ montant ; désactivé pour les captures d'écran (Robolectric). */
 val LocalAutoFocus = staticCompositionLocalOf { true }
@@ -108,8 +114,10 @@ fun BudgetApp(store: Store) {
     var entries by remember { mutableStateOf(store.loadEntries()) }
     var settings by remember { mutableStateOf(store.loadSettings()) }
     var today by remember { mutableStateOf(LocalDate.now()) }
-    var input by remember { mutableStateOf<EntryType?>(null) }
+    var editor by remember { mutableStateOf<EditorRequest?>(null) }
     var showSettings by remember { mutableStateOf(false) }
+    val snackbar = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     // Recalcule la date à chaque retour dans l'app (passage à minuit, nouveau mois…).
     LifecycleResumeEffect(Unit) {
@@ -121,19 +129,43 @@ fun BudgetApp(store: Store) {
     val money = remember(settings.currency, locale) { Money(settings.currency, locale) }
     val summary = Budget.summarize(entries, settings, today)
 
-    fun add(entry: Entry) {
-        entries = entries + entry
+    fun save(entry: Entry) {
+        entries = entries.filterNot { it.id == entry.id } + entry
         store.saveEntries(entries)
         today = LocalDate.now()
     }
 
+    val deletedMessage = stringResource(R.string.deleted)
+    val undoLabel = stringResource(R.string.undo)
     fun delete(entry: Entry) {
         entries = entries.filterNot { it.id == entry.id }
         store.saveEntries(entries)
+        scope.launch {
+            snackbar.currentSnackbarData?.dismiss()
+            if (snackbar.showSnackbar(deletedMessage, undoLabel, duration = SnackbarDuration.Short) == SnackbarResult.ActionPerformed) {
+                save(entry)
+            }
+        }
     }
 
     CompositionLocalProvider(LocalMoney provides money, LocalAppLocale provides locale) {
-        Scaffold(
+        val request = editor
+        if (request != null) {
+            EntryEditor(
+                request = request,
+                currentBalance = summary?.balanceCents,
+                onClose = { editor = null },
+                onSave = {
+                    save(it)
+                    editor = null
+                },
+                onDelete = {
+                    delete(it)
+                    editor = null
+                },
+            )
+        } else Scaffold(
+            snackbarHost = { SnackbarHost(snackbar) },
             topBar = {
                 TopAppBar(
                     title = {
@@ -164,11 +196,11 @@ fun BudgetApp(store: Store) {
                     top = padding.calculateTopPadding() + 4.dp,
                     bottom = padding.calculateBottomPadding() + 24.dp,
                 ),
-                verticalArrangement = Arrangement.spacedBy(14.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 item {
                     if (summary == null) {
-                        Welcome(onStart = { input = EntryType.BALANCE }, onSettings = { showSettings = true })
+                        Welcome(onStart = { editor = EditorRequest(EntryType.BALANCE) }, onSettings = { showSettings = true })
                     } else {
                         Hero(summary)
                     }
@@ -178,38 +210,37 @@ fun BudgetApp(store: Store) {
                 }
                 item {
                     Actions(
-                        onBalance = { input = EntryType.BALANCE },
-                        onExpense = { input = EntryType.EXPENSE },
-                        onIncome = { input = EntryType.INCOME },
+                        onBalance = { editor = EditorRequest(EntryType.BALANCE) },
+                        onExpense = { editor = EditorRequest(EntryType.EXPENSE) },
+                        onIncome = { editor = EditorRequest(EntryType.INCOME) },
                     )
                 }
                 if (entries.isNotEmpty()) {
                     item {
-                        Text(
-                            stringResource(R.string.history),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            modifier = Modifier.padding(top = 8.dp, start = 4.dp),
-                        )
+                        Column(Modifier.padding(top = 8.dp, start = 4.dp)) {
+                            Text(
+                                stringResource(R.string.history),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                            Text(
+                                stringResource(R.string.tap_to_edit),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
                     }
-                    items(entries.sortedByDescending { it.timestamp }.take(60), key = { it.id }) { entry ->
-                        EntryRow(entry, onDelete = { delete(entry) })
-                    }
+                    val zone = ZoneId.systemDefault()
+                    entries.sortedByDescending { it.timestamp }.take(150)
+                        .groupBy { Budget.dateOf(it, zone) }
+                        .forEach { (day, dayEntries) ->
+                            item(key = "day-$day") { DayHeader(day, today, dayEntries) }
+                            items(dayEntries, key = { it.id }) { entry ->
+                                EntryRow(entry, onClick = { editor = EditorRequest(entry.type, entry) })
+                            }
+                        }
                 }
             }
-        }
-
-        input?.let { type ->
-            AmountDialog(
-                type = type,
-                initial = if (type == EntryType.BALANCE) summary?.balanceCents else null,
-                onDismiss = { input = null },
-                onConfirm = { cents, note, category, excluded ->
-                    val now = System.currentTimeMillis()
-                    add(Entry(now, type, cents, now, note, category, excluded))
-                    input = null
-                },
-            )
         }
 
         if (showSettings) {
@@ -434,7 +465,37 @@ private fun Actions(onBalance: () -> Unit, onExpense: () -> Unit, onIncome: () -
 }
 
 @Composable
-private fun EntryRow(entry: Entry, onDelete: () -> Unit) {
+private fun DayHeader(day: LocalDate, today: LocalDate, dayEntries: List<Entry>) {
+    val locale = LocalAppLocale.current
+    val label = when (day) {
+        today -> stringResource(R.string.today)
+        today.minusDays(1) -> stringResource(R.string.yesterday)
+        else -> day.format(DateTimeFormatter.ofPattern("EEEE d MMMM", locale)).replaceFirstChar { it.uppercase(locale) }
+    }
+    val spent = dayEntries.filter { it.type == EntryType.EXPENSE }.sumOf { it.cents }
+    Row(
+        Modifier.fillMaxWidth().padding(start = 4.dp, end = 4.dp, top = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            label,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.weight(1f),
+        )
+        if (spent > 0) {
+            Text(
+                "− " + money(spent),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun EntryRow(entry: Entry, onClick: () -> Unit) {
     val category = Category.of(entry.category)
     val (icon, color) = when (entry.type) {
         EntryType.BALANCE -> Icons.Filled.Edit to MaterialTheme.colorScheme.primary
@@ -453,19 +514,20 @@ private fun EntryRow(entry: Entry, onDelete: () -> Unit) {
         EntryType.EXPENSE -> "− " + money(entry.cents)
         EntryType.INCOME -> "+ " + money(entry.cents)
     }
-    val date = Instant.ofEpochMilli(entry.timestamp).atZone(ZoneId.systemDefault())
-        .format(DateTimeFormatter.ofPattern("d MMM · HH:mm", LocalAppLocale.current))
+    val time = Instant.ofEpochMilli(entry.timestamp).atZone(ZoneId.systemDefault())
+        .format(DateTimeFormatter.ofPattern("HH:mm", LocalAppLocale.current))
     Card(
+        onClick = onClick,
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         modifier = Modifier.fillMaxWidth(),
     ) {
         Row(
-            Modifier.padding(start = 14.dp, top = 10.dp, bottom = 10.dp, end = 4.dp),
+            Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
-                Modifier.size(38.dp).clip(CircleShape).background(color.copy(alpha = 0.14f)),
+                Modifier.size(40.dp).clip(CircleShape).background(color.copy(alpha = 0.14f)),
                 contentAlignment = Alignment.Center,
             ) {
                 if (category != null) Text(category.emoji, fontSize = 18.sp)
@@ -473,146 +535,17 @@ private fun EntryRow(entry: Entry, onDelete: () -> Unit) {
             }
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
-                Text(label, style = MaterialTheme.typography.bodyLarge, maxLines = 1)
-                val sub = if (entry.excluded) "$date · ${stringResource(R.string.not_in_daily_budget)}" else date
+                Text(label, style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                val sub = if (entry.excluded) "$time · ${stringResource(R.string.not_in_daily_budget)}" else time
                 Text(sub, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
+            Spacer(Modifier.width(8.dp))
             Text(
                 amount,
                 fontWeight = FontWeight.SemiBold,
                 color = if (entry.type == EntryType.BALANCE) MaterialTheme.colorScheme.onSurface else color,
             )
-            IconButton(onClick = onDelete) {
-                Icon(
-                    Icons.Filled.Delete,
-                    contentDescription = stringResource(R.string.delete),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                )
-            }
         }
-    }
-}
-
-@Composable
-private fun AmountDialog(
-    type: EntryType,
-    initial: Long?,
-    onDismiss: () -> Unit,
-    onConfirm: (cents: Long, note: String, category: String?, excluded: Boolean) -> Unit,
-) {
-    val m = LocalMoney.current
-    var text by remember { mutableStateOf(initial?.let { m.editable(it) } ?: "") }
-    var note by remember { mutableStateOf("") }
-    var category by remember { mutableStateOf<Category?>(null) }
-    var excluded by remember { mutableStateOf(false) }
-    val cents = Budget.parseCents(text, allowNegative = type == EntryType.BALANCE)
-    val focus = remember { FocusRequester() }
-    val autoFocus = LocalAutoFocus.current
-    LaunchedEffect(Unit) {
-        if (!autoFocus) return@LaunchedEffect
-        // Attendre une frame que le champ soit attaché, sinon requestFocus() lève une exception.
-        withFrameNanos { }
-        runCatching { focus.requestFocus() }
-    }
-
-    val (title, hint) = when (type) {
-        EntryType.BALANCE -> R.string.balance_title to R.string.balance_hint
-        EntryType.EXPENSE -> R.string.expense_title to R.string.expense_hint
-        EntryType.INCOME -> R.string.income_title to R.string.income_hint
-    }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(title)) },
-        text = {
-            Column(
-                Modifier.verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                Text(
-                    stringResource(hint),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                OutlinedTextField(
-                    value = text,
-                    onValueChange = { text = it },
-                    modifier = Modifier.fillMaxWidth().focusRequester(focus),
-                    singleLine = true,
-                    suffix = { Text(m.symbol) },
-                    textStyle = MaterialTheme.typography.headlineSmall.copy(textAlign = TextAlign.End),
-                    isError = text.isNotBlank() && cents == null,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
-                )
-                if (type == EntryType.EXPENSE) {
-                    Text(
-                        stringResource(R.string.category_optional),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Category.entries.chunked(2).forEach { pair ->
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                pair.forEach { c ->
-                                    FilterChip(
-                                        selected = category == c,
-                                        onClick = {
-                                            category = if (category == c) null else c
-                                            excluded = category?.fixed ?: false
-                                        },
-                                        label = { Text("${c.emoji} ${stringResource(c.label)}", maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                                        modifier = Modifier.weight(1f),
-                                    )
-                                }
-                                if (pair.size == 1) Spacer(Modifier.weight(1f))
-                            }
-                        }
-                    }
-                }
-                if (type == EntryType.EXPENSE || (type == EntryType.BALANCE && initial != null)) {
-                    ToggleRow(
-                        title = stringResource(if (type == EntryType.EXPENSE) R.string.exclude_expense else R.string.exclude_balance),
-                        help = stringResource(if (type == EntryType.EXPENSE) R.string.exclude_expense_help else R.string.exclude_balance_help),
-                        checked = excluded,
-                        onChange = { excluded = it },
-                    )
-                }
-                if (type != EntryType.BALANCE) {
-                    OutlinedTextField(
-                        value = note,
-                        onValueChange = { note = it },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        label = { Text(stringResource(R.string.note_optional)) },
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = { cents?.let { onConfirm(it, note.trim(), category?.key, excluded) } },
-                enabled = cents != null,
-            ) { Text(stringResource(R.string.ok)) }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
-    )
-}
-
-@Composable
-private fun ToggleRow(title: String, help: String, checked: Boolean, onChange: (Boolean) -> Unit) {
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .clickable { onChange(!checked) }
-            .padding(vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(Modifier.weight(1f).padding(end = 12.dp)) {
-            Text(title, style = MaterialTheme.typography.bodyLarge)
-            Text(help, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-        Switch(checked = checked, onCheckedChange = onChange)
     }
 }
 

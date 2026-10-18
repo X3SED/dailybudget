@@ -63,4 +63,17 @@
     <string name="cat_health">Santé</string>
     <string name="cat_leisure">Loisirs</string>
     <string name="cat_other">Autre</string>
+
+    <string name="edit_expense">Modifier la dépense</string>
+    <string name="edit_income">Modifier le revenu</string>
+    <string name="edit_balance">Modifier le solde</string>
+    <string name="type_balance">Solde</string>
+    <string name="date">Date</string>
+    <string name="today">Aujourd\'hui</string>
+    <string name="yesterday">Hier</string>
+    <string name="other_date">Autre date</string>
+    <string name="close">Fermer</string>
+    <string name="deleted">Élément supprimé</string>
+    <string name="undo">Annuler</string>
+    <string name="tap_to_edit">Touche un élément pour le modifier ou le supprimer.</string>
 </resources>

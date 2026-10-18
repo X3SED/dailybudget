@@ -7,9 +7,9 @@ Available in English and French (follows the phone language, or pick it per app 
 
 All versions: [Releases](https://github.com/X3SED/dailybudget/releases)
 
-| Home (FR) | Dark mode (EN) | Settings |
-|:---:|:---:|:---:|
-| <img src="docs/screenshots/1-home-fr.png" width="240"> | <img src="docs/screenshots/2-home-en-dark.png" width="240"> | <img src="docs/screenshots/3-settings-en.png" width="240"> |
+| Home (FR) | Add / edit (FR) | Dark mode (EN) | Settings |
+|:---:|:---:|:---:|:---:|
+| <img src="docs/screenshots/1-home-fr.png" width="200"> | <img src="docs/screenshots/2-expense-fr.png" width="200"> | <img src="docs/screenshots/3-home-en-dark.png" width="200"> | <img src="docs/screenshots/4-settings-en.png" width="200"> |
 
 ## How it works
 
@@ -24,7 +24,9 @@ All versions: [Releases](https://github.com/X3SED/dailybudget/releases)
 The daily budget is fixed from the balance at the start of the day, so it doesn't drop as you spend:
 just updating the balance is enough, the app works out what you spent today.
 
-Optionally you can log an **expense** (with a category: groceries, car & fuel, shopping, rent…) or an **income** (salary…).
+Optionally you can log an **expense** (with a category: groceries, car & fuel, shopping, rent…) or an **income** (salary…),
+on today's date or any past date. Tap any entry in the history to change its amount, date, category or type, or to delete it
+(with undo).
 
 ### Fixed / exceptional expenses
 
