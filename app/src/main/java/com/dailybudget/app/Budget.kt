@@ -48,7 +48,25 @@ data class Summary(
     val tomorrowDailyCents: Long?,
 )
 
+/** Écart d'une mise à jour du solde par rapport à la précédente. */
+data class BalanceDelta(val cents: Long, val sinceTimestamp: Long)
+
 object Budget {
+
+    /**
+     * Pour chaque mise à jour du solde (par id) : différence avec la mise à jour précédente.
+     * Inclut tout ce qui s'est passé entre les deux (dépenses saisies ou non, revenus).
+     */
+    fun balanceDeltas(entries: List<Entry>): Map<Long, BalanceDelta> {
+        var previous: Entry? = null
+        val result = mutableMapOf<Long, BalanceDelta>()
+        for (e in entries.sortedBy { it.timestamp }) {
+            if (e.type != EntryType.BALANCE) continue
+            previous?.let { result[e.id] = BalanceDelta(e.cents - it.cents, it.timestamp) }
+            previous = e
+        }
+        return result
+    }
 
     fun paydayIn(month: YearMonth, payday: Int): LocalDate =
         month.atDay(payday.coerceIn(1, month.lengthOfMonth()))

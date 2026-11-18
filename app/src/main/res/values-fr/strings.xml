@@ -76,4 +76,6 @@
     <string name="deleted">Élément supprimé</string>
     <string name="undo">Annuler</string>
     <string name="tap_to_edit">Touche un élément pour le modifier ou le supprimer.</string>
+    <string name="since_date">depuis le %1$s</string>
+    <string name="balance_delta_message">%1$s depuis ta dernière mise à jour du solde</string>
 </resources>

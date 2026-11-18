@@ -21,6 +21,9 @@ All versions: [Releases](https://github.com/X3SED/dailybudget/releases)
    - your **daily budget** = (balance − set-aside) ÷ days left until payday (today included);
    - how much you'll have per day **from tomorrow** if you spend nothing else today.
 
+Each balance update shows how much the balance moved since the previous one (e.g. "− MAD 814.00 since 17 Nov"),
+in the history and in a short message right after you save it.
+
 The daily budget is fixed from the balance at the start of the day, so it doesn't drop as you spend:
 just updating the balance is enough, the app works out what you spent today.
 

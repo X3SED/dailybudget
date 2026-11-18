@@ -86,6 +86,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LifecycleResumeEffect
+import com.dailybudget.app.BalanceDelta
 import com.dailybudget.app.Budget
 import com.dailybudget.app.Entry
 import com.dailybudget.app.EntryType
@@ -108,6 +109,9 @@ val LocalAutoFocus = staticCompositionLocalOf { true }
 @Composable
 private fun money(cents: Long) = LocalMoney.current.format(cents)
 
+/** « + 120,00 MAD » / « − 814,00 MAD ». */
+private fun Money.signed(cents: Long) = (if (cents >= 0) "+ " else "− ") + format(Math.abs(cents))
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BudgetApp(store: Store) {
@@ -129,10 +133,22 @@ fun BudgetApp(store: Store) {
     val money = remember(settings.currency, locale) { Money(settings.currency, locale) }
     val summary = Budget.summarize(entries, settings, today)
 
+    val deltaMessage = stringResource(R.string.balance_delta_message)
     fun save(entry: Entry) {
         entries = entries.filterNot { it.id == entry.id } + entry
         store.saveEntries(entries)
         today = LocalDate.now()
+    }
+
+    // Après une mise à jour du solde : combien il a bougé depuis la précédente.
+    fun saveAndReport(entry: Entry) {
+        save(entry)
+        if (entry.type != EntryType.BALANCE) return
+        val delta = Budget.balanceDeltas(entries)[entry.id] ?: return
+        scope.launch {
+            snackbar.currentSnackbarData?.dismiss()
+            snackbar.showSnackbar(deltaMessage.format(money.signed(delta.cents)), duration = SnackbarDuration.Long)
+        }
     }
 
     val deletedMessage = stringResource(R.string.deleted)
@@ -156,8 +172,8 @@ fun BudgetApp(store: Store) {
                 currentBalance = summary?.balanceCents,
                 onClose = { editor = null },
                 onSave = {
-                    save(it)
                     editor = null
+                    saveAndReport(it)
                 },
                 onDelete = {
                     delete(it)
@@ -231,12 +247,13 @@ fun BudgetApp(store: Store) {
                         }
                     }
                     val zone = ZoneId.systemDefault()
+                    val deltas = Budget.balanceDeltas(entries)
                     entries.sortedByDescending { it.timestamp }.take(150)
                         .groupBy { Budget.dateOf(it, zone) }
                         .forEach { (day, dayEntries) ->
                             item(key = "day-$day") { DayHeader(day, today, dayEntries) }
                             items(dayEntries, key = { it.id }) { entry ->
-                                EntryRow(entry, onClick = { editor = EditorRequest(entry.type, entry) })
+                                EntryRow(entry, deltas[entry.id], onClick = { editor = EditorRequest(entry.type, entry) })
                             }
                         }
                 }
@@ -495,7 +512,7 @@ private fun DayHeader(day: LocalDate, today: LocalDate, dayEntries: List<Entry>)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun EntryRow(entry: Entry, onClick: () -> Unit) {
+private fun EntryRow(entry: Entry, delta: BalanceDelta?, onClick: () -> Unit) {
     val category = Category.of(entry.category)
     val (icon, color) = when (entry.type) {
         EntryType.BALANCE -> Icons.Filled.Edit to MaterialTheme.colorScheme.primary
@@ -536,15 +553,37 @@ private fun EntryRow(entry: Entry, onClick: () -> Unit) {
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
                 Text(label, style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                val sub = if (entry.excluded) "$time · ${stringResource(R.string.not_in_daily_budget)}" else time
-                Text(sub, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                val parts = buildList {
+                    add(time)
+                    if (delta != null) {
+                        val since = Instant.ofEpochMilli(delta.sinceTimestamp).atZone(ZoneId.systemDefault())
+                            .format(DateTimeFormatter.ofPattern("d MMM", LocalAppLocale.current))
+                        add(stringResource(R.string.since_date, since))
+                    }
+                    if (entry.excluded) add(stringResource(R.string.not_in_daily_budget))
+                }
+                Text(
+                    parts.joinToString(" · "),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
             Spacer(Modifier.width(8.dp))
-            Text(
-                amount,
-                fontWeight = FontWeight.SemiBold,
-                color = if (entry.type == EntryType.BALANCE) MaterialTheme.colorScheme.onSurface else color,
-            )
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    amount,
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (entry.type == EntryType.BALANCE) MaterialTheme.colorScheme.onSurface else color,
+                )
+                if (delta != null) {
+                    Text(
+                        LocalMoney.current.signed(delta.cents),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = if (delta.cents < 0) Negative else Positive,
+                    )
+                }
+            }
         }
     }
 }

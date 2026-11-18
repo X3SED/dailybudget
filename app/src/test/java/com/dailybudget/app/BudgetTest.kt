@@ -104,6 +104,19 @@ class BudgetTest {
     }
 
     @Test
+    fun balanceDeltasCompareWithPreviousUpdate() {
+        val first = entry(EntryType.BALANCE, 6724, today.minusDays(7))
+        val expense = entry(EntryType.EXPENSE, 500, today.minusDays(4))
+        val second = entry(EntryType.BALANCE, 5940, today.minusDays(1))
+        val third = entry(EntryType.BALANCE, 5126, today)
+        val deltas = Budget.balanceDeltas(listOf(third, expense, first, second))
+        assertNull(deltas[first.id])
+        assertEquals(BalanceDelta(-78400, first.timestamp), deltas[second.id])
+        assertEquals(BalanceDelta(-81400, second.timestamp), deltas[third.id])
+        assertNull(deltas[expense.id])
+    }
+
+    @Test
     fun reserveIsExcluded() {
         val s = Budget.summarize(
             listOf(entry(EntryType.BALANCE, 1000)),

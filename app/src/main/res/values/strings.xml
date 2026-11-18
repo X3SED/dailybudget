@@ -77,4 +77,6 @@
     <string name="deleted">Entry deleted</string>
     <string name="undo">Undo</string>
     <string name="tap_to_edit">Tap an entry to edit or delete it.</string>
+    <string name="since_date">since %1$s</string>
+    <string name="balance_delta_message">%1$s since your last balance update</string>
 </resources>
